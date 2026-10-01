@@ -1,4 +1,6 @@
-# MAGI — 三賢人による合議システム
+# QwenMAGI — 三賢人による合議システム
+
+pi・ローカルQwenと席別Formationに対応した、[MAGI](https://github.com/tmknzz/MAGI)の派生スキルです。旧`magi`とは別にインストールでき、`qwenmagi`の明示指定で起動します。
 
 エヴァンゲリオンの **MAGI** をモチーフにした、お題を練り上げる Claude Code / Codex 用スキル。赤木ナオコ博士が自身の人格の3側面を移植した3つのスーパーコンピュータに倣い、**科学者・母・女**の3人格（MELCHIOR / BALTHASAR / CASPER）が、与えられたお題を独立に採点する。全員が80点に達するまで自動で練り直し、合議で可決された完成版を返す。お題のジャンルは問わない ── 企画・ネーミング・コピー・解説・戦略・分析まで、練り上げる価値があるものなら何でも。途中でユーザーに質問せず、可決まで一気に自走する。
 
@@ -48,8 +50,8 @@ MAGI の審議がどう進むかの一例（イメージ）:
 Claude Code の中で次を実行します:
 
 ```text
-/plugin marketplace add tmknzz/MAGI
-/plugin install magi@magi
+/plugin marketplace add tmknzz/qwenmagi
+/plugin install qwenmagi@qwenmagi
 ```
 
 スキルの登録が自動で行われます。
@@ -59,9 +61,9 @@ Claude Code の中で次を実行します:
 スキルフォルダを Claude Code のスキルディレクトリにコピーします:
 
 ```bash
-git clone https://github.com/tmknzz/MAGI.git
-cd MAGI
-mkdir -p ~/.claude/skills && cp -R skills/magi ~/.claude/skills/magi
+git clone https://github.com/tmknzz/qwenmagi.git
+cd qwenmagi
+mkdir -p ~/.claude/skills && cp -R skills/qwenmagi ~/.claude/skills/qwenmagi
 ```
 
 ### 手動インストール（Codex）
@@ -69,9 +71,9 @@ mkdir -p ~/.claude/skills && cp -R skills/magi ~/.claude/skills/magi
 スキルフォルダを Codex のスキルディレクトリにコピーします:
 
 ```bash
-git clone https://github.com/tmknzz/MAGI.git
-cd MAGI
-mkdir -p ~/.agents/skills && cp -R skills/magi ~/.agents/skills/magi
+git clone https://github.com/tmknzz/qwenmagi.git
+cd qwenmagi
+mkdir -p ~/.agents/skills && cp -R skills/qwenmagi ~/.agents/skills/qwenmagi
 ```
 
 Codex はユーザーレベルのスキルを `~/.agents/skills` から読み込みます（リポジトリ直下の `.agents/skills` に置けばプロジェクト単位でも使えます）。
@@ -79,14 +81,14 @@ Codex はユーザーレベルのスキルを `~/.agents/skills` から読み込
 ### piで使用
 
 ```sh
-pi --skill /absolute/path/MAGI/skills/magi/SKILL.md
+pi --skill /absolute/path/qwenmagi/skills/qwenmagi/SKILL.md
 ```
 
-pi内で`/skill:magi`からお題を渡します。`~/.agents/skills/magi`へのインストールも利用できます。
+pi内で`/skill:qwenmagi`からお題を渡します。`~/.agents/skills/qwenmagi`へのインストールも利用できます。
 
 ## Formationの指定
 
-`~/.config/magi/formations/local.conf`に例えば次のように書き、「MAGIのlocalで審議して」と指定します。
+`~/.config/qwenmagi/formations/local.conf`に例えば次のように書き、「qwenmagiのlocalで審議して」と指定します。
 
 ```text
 MAGI-M: pi qwen38-local/Qwen3.8-27B-abliterated-MLX-4bit low
@@ -96,21 +98,21 @@ MAGI-C: codex gpt-6-astra high
 
 モデルIDとThinkingの対応は接続環境に合わせます。未指定席はprimary。MAGI定義を選ばなければVDGGのMAGI席を継承し、それもなければ全席primaryです。単独実行にVDGGは不要です。
 
-設定形式・優先順位・CLI・pi接続・失敗時の扱いは[Formationガイド](skills/magi/references/formations.md)を参照してください。ヘルパーにはPython 3が必要です。
+設定形式・優先順位・CLI・pi接続・失敗時の扱いは[Formationガイド](skills/qwenmagi/references/formations.md)を参照してください。ヘルパーにはPython 3が必要です。
 
 ## 使い方
 
 次のいずれかで起動します:
 
-- `/magi` と打つ
-- 「MAGIで練って」「MAGIで審議して」のように MAGI を名指しで頼む
-- 「MAGI」とはっきり名前を呼ぶ
+- `/qwenmagi` と打つ
+- 「qwenmagiで練って」「qwenmagiで審議して」のように qwenmagi を名指しで頼む
+- 「qwenmagi」とはっきり名前を呼ぶ
 
 お題を受け取ると、MAGIは**質問を挟まずに自走**する。審議のログ（各議の採点と詰め）は見せるが、途中で「どうしますか？」とは止まらない。可決まで一気に回す。
 
 ## VDGG連携
 
-[VibesDeGoGo! for Claude Code](https://github.com/tmknzz/VibesDeGoGo-for-Claude-Code) または [VibesDeGoGo! for Codex](https://github.com/tmknzz/VibesDeGoGo-for-Codex) を併用している場合、MAGIは2つの役割も担う:
+[VibesDeGoGo! for Claude Code](https://github.com/tmknzz/VibesDeGoGo-for-Claude-Code) または [VibesDeGoGo! for Codex](https://github.com/tmknzz/VibesDeGoGo-for-Codex) を併用し、呼び出し元がqwenmagiを明示選択した場合、次の2つの役割も担う（既定のMAGI連携は旧magiのまま）:
 
 - **(a) Step 0 の要件審議** ── 要件ドラフトを3人格で叩き、判断材料をユーザーに渡す。
 - **(b) 主観的成果物のレビューゲート** ── 文言・ドキュメント・デザイン・ネーミング等を可決/否決する。

@@ -51,7 +51,7 @@ def spec(value):
 def config_file(name):
     if not re.fullmatch(r"[a-z0-9][a-z0-9._-]*", name):
         raise ValueError("invalid formation name")
-    root = Path(os.environ.get("MAGI_CONFIG_DIR", str(Path.home() / ".config/magi")))
+    root = Path(os.environ.get("QWENMAGI_CONFIG_DIR", str(Path.home() / ".config/qwenmagi")))
     return root / "formations" / f"{name}.conf"
 
 
@@ -78,12 +78,12 @@ def command_run(argv, *, prompt=None, timeout=180, env=None, cwd=None):
 def vdgg_call(helper, operation, seat, *args, timeout=30):
     helper = str(Path(helper).expanduser().resolve(strict=True))
     body = 'source "$1"; shift; op=$1; shift; "$op" "$@"'
-    return command_run(["bash", "-c", body, "magi", helper, operation,
+    return command_run(["bash", "-c", body, "qwenmagi", helper, operation,
                         "MAGI_" + SEATS[seat] + "_AI", *args], timeout=timeout)
 
 
 def resolve(formation=None, vdgg_helper=None):
-    name = formation if formation is not None else os.environ.get("MAGI_FORMATION")
+    name = formation if formation is not None else os.environ.get("QWENMAGI_FORMATION")
     if name:
         result = {seat: {**spec("primary"), "source": name} for seat in SEATS}
         seen = set()
@@ -149,7 +149,7 @@ def validate(reply, opening=False):
 
 def argv_for(assignment, output):
     executor = assignment["executor"]
-    binary = os.environ.get("MAGI_" + executor.upper() + "_BIN", executor)
+    binary = os.environ.get("QWENMAGI_" + executor.upper() + "_BIN", executor)
     if executor not in LEVELS:
         raise ValueError("argv_for requires an external pi/codex/claude seat")
     model, thinking = assignment["model"], assignment["thinking"]
@@ -209,7 +209,7 @@ def run_seat(seat, assignment, candidate, output, opening=False, timeout=180):
         raise ValueError("primary: calling AI must perform the seat with prepare/validate")
     prompt = prepare(seat, candidate, opening)
     started = time.monotonic()
-    with tempfile.TemporaryDirectory(prefix="magi-seat-") as directory:
+    with tempfile.TemporaryDirectory(prefix="qwenmagi-seat-") as directory:
         answer = Path(directory) / "answer.txt"
         if assignment["executor"] == "vdgg":
             input_file = Path(directory) / "prompt.txt"
@@ -222,8 +222,8 @@ def run_seat(seat, assignment, candidate, output, opening=False, timeout=180):
             reply = answer.read_text()
         else:
             env = os.environ.copy()
-            if assignment["executor"] == "pi" and env.get("MAGI_PI_AGENT_DIR"):
-                env["PI_CODING_AGENT_DIR"] = env["MAGI_PI_AGENT_DIR"]
+            if assignment["executor"] == "pi" and env.get("QWENMAGI_PI_AGENT_DIR"):
+                env["PI_CODING_AGENT_DIR"] = env["QWENMAGI_PI_AGENT_DIR"]
             if assignment["executor"] == "pi":
                 preflight_pi(assignment, env, directory)
             reply = command_run(argv_for(assignment, answer), prompt=prompt,
@@ -287,7 +287,7 @@ def main():
                               args.opening, args.timeout)
         print(json.dumps(result, ensure_ascii=False, indent=2))
     except (ValueError, OSError) as error:
-        print(f"magi: {error}", file=sys.stderr)
+        print(f"qwenmagi: {error}", file=sys.stderr)
         sys.exit(1)
 
 

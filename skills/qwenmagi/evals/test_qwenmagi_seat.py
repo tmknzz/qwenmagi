@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-path = Path(__file__).resolve().parents[1] / "scripts/magi-seat.py"
-loader = importlib.util.spec_from_file_location("magi_seat", path)
+path = Path(__file__).resolve().parents[1] / "scripts/qwenmagi-seat.py"
+loader = importlib.util.spec_from_file_location("qwenmagi_seat", path)
 magi = importlib.util.module_from_spec(loader)
 loader.loader.exec_module(magi)
 
@@ -15,7 +15,7 @@ class Seats(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        self.env = patch.dict(os.environ, {"MAGI_CONFIG_DIR": str(self.root)}, clear=True)
+        self.env = patch.dict(os.environ, {"QWENMAGI_CONFIG_DIR": str(self.root)}, clear=True)
         self.env.start()
         self.preflight = patch.object(magi, "preflight_pi")
         self.preflight.start()
@@ -37,9 +37,23 @@ class Seats(unittest.TestCase):
         self.assertEqual(result["M"]["thinking"], "high")
         self.assertEqual(result["B"]["executor"], "primary")
 
+    def test_old_namespace_does_not_select_new_skill(self):
+        os.environ["MAGI_FORMATION"] = "missing"
+        os.environ["MAGI_CONFIG_DIR"] = "/old/config"
+        os.environ["MAGI_PI_BIN"] = "/old/pi"
+        self.assertEqual([s["executor"] for s in magi.resolve().values()], ["primary"] * 3)
+        self.assertEqual(magi.config_file("local"), self.root / "formations/local.conf")
+        assignment = magi.spec("pi local/Qwen off")
+        self.assertEqual(magi.argv_for(assignment, self.root / "out")[0], "pi")
+        os.environ["QWENMAGI_PI_BIN"] = "/new/pi"
+        self.assertEqual(magi.argv_for(assignment, self.root / "out")[0], "/new/pi")
+        self.formation("M: primary")
+        os.environ["QWENMAGI_FORMATION"] = "local"
+        self.assertEqual(magi.resolve()["M"]["source"], "local")
+
     def test_three_distinct_and_priority(self):
         self.formation("M: pi local/Qwen off\nB: claude opus high\nC: codex gpt-6-astra low")
-        os.environ["MAGI_FORMATION"] = "missing"
+        os.environ["QWENMAGI_FORMATION"] = "missing"
         with patch.object(magi, "vdgg_call", side_effect=AssertionError("must not call VDGG")):
             result = magi.resolve("local", "/not-used")
         self.assertEqual([x["executor"] for x in result.values()], ["pi", "claude", "codex"])
