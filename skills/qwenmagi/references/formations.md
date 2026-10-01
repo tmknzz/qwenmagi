@@ -1,7 +1,7 @@
 # 席別Formation
 
 単独実行はPython 3と使用するCLIだけで動く。VDGGは必須ではない。
-`~/.config/magi/formations/<名前>.conf` に定義する（`MAGI_CONFIG_DIR`で設定ルートを変更可）。
+`~/.config/qwenmagi/formations/<名前>.conf` に定義する（`QWENMAGI_CONFIG_DIR`で設定ルートを変更可）。
 
 ```text
 MAGI-M: pi qwen38-local/Qwen3.8-27B-abliterated-MLX-4bit low
@@ -11,7 +11,7 @@ MAGI-C: codex gpt-6-astra high
 ここから下は自由メモ。
 ```
 
-各行は `MAGI-M/B/C: 実行器 [モデル] [Thinking]`。`M/B/C`も可。
+席名はVDGGと共通の互換形式を保持する。各行は `MAGI-M/B/C: 実行器 [モデル] [Thinking]`。`M/B/C`も可。
 実行器は `primary`（`inline`も可）、`pi`、`claude`、`codex`。
 piは曖昧なモデル選択を避けるため完全な`provider/model-ID`を必須とする。
 モデルIDに`/`が含まれていてもよい。ThinkingはモデルIDの末尾に付けず別トークンにする。
@@ -23,19 +23,19 @@ Claude/Codexはモデル・Thinkingを省略するとそのCLIの設定を使う
 
 ## 選択と優先順位
 
-1. `--formation <名前>`、または環境変数`MAGI_FORMATION`で選んだMAGI定義。
-2. MAGI定義がないとき、呼び出し元が渡した`--vdgg-helper /絶対パス/vdgg-state.sh`でVDGGのMAGI3席を解決。
+1. `--formation <名前>`、または環境変数`QWENMAGI_FORMATION`で選んだqwenmagi定義。
+2. qwenmagi定義がないとき、呼び出し元が渡した`--vdgg-helper /絶対パス/vdgg-state.sh`でVDGGのMAGI3席を解決。
 3. 両方なければ全席primary。
 
-MAGI定義を選んだら未記載席はprimary。VDGGの席を部分合成しない。
+qwenmagi定義を選んだら未記載席はprimary。VDGGの席を部分合成しない。
 指定されたファイルの欠落・不正行・重複席はエラー。無指定と設定ミスを区別する。
-MAGI定義には`*`やfallbackを追加していない。VDGG経路は既存のalias/custom executor/明示fallbackをそのままVDGGに任せる。
+qwenmagi定義には`*`やfallbackを追加していない。VDGG経路は既存のalias/custom executor/明示fallbackをそのままVDGGに任せる。
 VDGGフォーメーションの`*`はMAGI席を対象にしない。
-VDGG本体が未対応の`pi model thinking`をVDGG定義へ直接追加しない。pi用はMAGI定義を選択する。
+VDGG本体が未対応の`pi model thinking`をVDGG定義へ直接追加しない。pi用はqwenmagi定義を選択する。
 
 ## ホストの実行手順
 
-`SCRIPT`はこのスキル内の`scripts/magi-seat.py`の絶対パス。
+`SCRIPT`はこのスキル内の`scripts/qwenmagi-seat.py`の絶対パス。
 
 ```sh
 python3 "$SCRIPT" resolve --formation local > /絶対パス/lineup.json
@@ -60,15 +60,15 @@ python3 "$SCRIPT" validate --input /絶対パス/round-1-M.txt
 pi上での単独起動はスキルを通常どおり読み込む。
 
 ```sh
-pi --skill /絶対パス/MAGI/skills/magi/SKILL.md
+pi --skill /絶対パス/qwenmagi/skills/qwenmagi/SKILL.md
 ```
 
-pi内で`/skill:magi`からお題とFormation名を指定する。
-`~/.agents/skills/magi`もpiの探索先。外部席の実行時には再帰起動を防ぐためスキルを読ませない。
+pi内で`/skill:qwenmagi`からお題とFormation名を指定する。
+`~/.agents/skills/qwenmagi`もpiの探索先。外部席の実行時には再帰起動を防ぐためスキルを読ませない。
 
-外部席のpi実行ファイルは`MAGI_PI_BIN`、pi設定ディレクトリは`MAGI_PI_AGENT_DIR`で指定できる。
+外部席のpi実行ファイルは`QWENMAGI_PI_BIN`、pi設定ディレクトリは`QWENMAGI_PI_AGENT_DIR`で指定できる。
 後者がなければ通常の`PI_CODING_AGENT_DIR`を使う。
-`MAGI_CODEX_BIN`、`MAGI_CLAUDE_BIN`も指定可。値は単一の実行ファイルで、シェルコマンド文字列ではない。
+`QWENMAGI_CODEX_BIN`、`QWENMAGI_CLAUDE_BIN`も指定可。値は単一の実行ファイルで、シェルコマンド文字列ではない。
 
 piの`models.json`で正確なprovider/modelとエンドポイントを登録する。
 Qwenのテンプレートがdeveloperロールを受けない場合は`supportsDeveloperRole: false`を指定する。

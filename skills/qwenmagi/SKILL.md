@@ -1,21 +1,20 @@
 ---
-name: magi
+name: qwenmagi
 description: >-
   お題を3人格(MELCHIOR/BALTHASAR/CASPER)の合議で全力で練り上げるスキル。エヴァンゲリオンのMAGIをモチーフに、
   科学者・母・女の3側面が、与えられたお題を独立採点し、全員が80点に達するまで自動で練り直す。お題はジャンルを
   問わない ── 企画・デザイン・製品・ネーミング・コピーから、解説・エッセイ・主張・戦略・分析まで、練り上げる価値が
   あるものなら何でも対象。
-  【起動条件】(1)ユーザーが明示的に呼び出したとき ── `/magi` と打つ、「MAGI」と名指しする、
-  「MAGIで〜して／練って／審議して」と頼む、のいずれか。(2)VDGGセッション内からの呼び出し ──
-  ユーザーのグローバル指示（Claude CodeはCLAUDE.md、CodexはAGENTS.md）が定める条件に合致するとき（Step
-  0要件審議、または主観的成果物のレビューゲート）。
-  この2経路のいずれかであり、ユーザーが「MAGI」を名指ししない通常の依頼では起動しない（普通に対応する）。
-  上記2経路の道具であり、それ以外では勝手に発火させない。
+  【起動条件】ユーザーが `/qwenmagi` または「qwenmagiで審議して」と明示したとき、
+  もしくは呼び出し元VDGGがqwenmagiを明示選択したときだけ起動する。
+  通常の「MAGI」依頼やグローバル指示の既定MAGI連携は旧magiが担当し、本スキルは起動しない。
   3席それぞれの実行器・モデル・ThinkingをテキストFormationで指定できる。未指定席は起動元AI。
   Claude Code、Codex、pi上で単独またはVDGG内から使用でき、pi経由のローカルモデルにも委任できる。
 ---
 
-# MAGI — 三賢人による合議システム
+# QwenMAGI — 三賢人による合議システム
+
+旧[magi](https://github.com/tmknzz/MAGI)とは別スキル。VDGG内でもqwenmagiを明示選択して使う。`MAGI-M/B/C`と`MAGI判定`は共有VDGGとの互換形式として保持する。
 
 エヴァンゲリオンの **MAGI** をモチーフにした、お題を練り上げるスキル。赤木ナオコ博士が自身の人格の3側面（科学者・母・女）を
 移植した3つのスーパーコンピュータに倣い、3つの人格がお題を独立に審議する。**全員が80点を出すまで自動で練り直し、
@@ -94,7 +93,7 @@ description: >-
 
 **指定がなければ3席ともprimary（MAGIを起動した現在のAI）**。pi上のQwenから呼んだならそのQwen、CodexからならそのCodexが担当する。外部CLIの既定モデルへ置き換えない。
 
-席を委任する場合、またはVDGGのFormationを使う場合は、開始前に [Formationの定義と実行手順](references/formations.md) を読む。`scripts/magi-seat.py`で割当を解決し、開幕前に3席の担当を表示する。
+席を委任する場合、またはVDGGのFormationを使う場合は、開始前に [Formationの定義と実行手順](references/formations.md) を読む。`scripts/qwenmagi-seat.py`で割当を解決し、開幕前に3席の担当を表示する。
 
 ```text
 MAGI-M: pi qwen38-local/Qwen3.8-27B-abliterated-MLX-4bit low
@@ -102,15 +101,15 @@ MAGI-B: primary
 MAGI-C: codex gpt-6-astra high
 ```
 
-- MAGI専用Formationを明示選択したら、その定義だけで全席を決める。未記載席はprimary。VDGGの席と部分合成しない。
-- MAGI専用Formationがなければ呼び出し元VDGGの`MAGI-M/B/C`を使う。VDGGにも指定がなければprimary。単独使用はVDGGのインストールを必要としない。
+- qwenmagi専用Formationを明示選択したら、その定義だけで全席を決める。未記載席はprimary。VDGGの席と部分合成しない。
+- qwenmagi専用Formationがなければ呼び出し元VDGGの`MAGI-M/B/C`を使う。VDGGにも指定がなければprimary。単独使用はVDGGのインストールを必要としない。
 - primary席はホスト自身がこの人格・共通規範で開幕案と採点を作る。外部席は開幕案から最終議まで毎回実際に呼び出す。ホストが代演しない。
 - 各議は同一の審議対象を固定して全席へ渡す。他席の当該議の採点・提案は渡さない。外部席は独立プロセス、ローカルモデルは逐次実行を既定にする。
 - 外部応答は改変しない。呼出し失敗・不正応答・欠席があれば可決不能。設定ミスを無指定と扱わず、primaryへの暗黙fallbackもしない。VDGGに明記された外部fallbackだけはVDGGの実行契約に従う。
 - 全席の評価を受け取ってから提案を統合する。統合で変更した完成版は次議の対象にする。採点後に内容を変更し、変更前の点数を完成版へ流用しない。
 - Thinkingはモデルごとに対応を確認する。指定値・実測した値・未確認を区別し、CLIが成功しただけで実効を断定しない。
 
-**既存の「混成で」「Real MELCHIORで」は互換指定として残す。** Formationの明示選択がなければ、実行ごとの作業ディレクトリに`MAGI-M: codex`だけの一時Formationを作り、`MAGI_CONFIG_DIR`と`--formation`で選択する（B/Cはprimary）。ユーザーの既存設定を上書きしない。明示Formationがあればそれを優先する。起動元もCodexなら別ベンダーの独立性は得られないことを明記する。
+**qwenmagi起動後の「混成で」「Real MELCHIORで」は互換指定として残す。** Formationの明示選択がなければ、実行ごとの作業ディレクトリに`MAGI-M: codex`だけの一時Formationを作り、`QWENMAGI_CONFIG_DIR`と`--formation`で選択する（B/Cはprimary）。ユーザーの既存設定を上書きしない。明示Formationがあればそれを優先する。起動元もCodexなら別ベンダーの独立性は得られないことを明記する。
 
 ---
 

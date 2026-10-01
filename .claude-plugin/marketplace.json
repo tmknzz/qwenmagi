@@ -1,12 +1,12 @@
 {
-  "name": "magi",
+  "name": "qwenmagi",
   "owner": {
     "name": "tmknzz"
   },
-  "description": "MAGI three-persona deliberation skill for Claude Code",
+  "description": "QwenMAGI three-persona deliberation skill for Claude Code",
   "plugins": [
     {
-      "name": "magi",
+      "name": "qwenmagi",
       "source": ".",
       "description": "Three personas score a prompt independently and auto-iterate until all three reach 80."
     }

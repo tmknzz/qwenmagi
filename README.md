@@ -1,4 +1,6 @@
-# MAGI — Council of Three Sages
+# QwenMAGI — Council of Three Sages
+
+A derivative of [MAGI](https://github.com/tmknzz/MAGI) with pi, local Qwen and per-seat Formations. Install alongside the original `magi`; invoke this skill explicitly as `qwenmagi`.
 
 A skill for Claude Code and Codex that hones a prompt, themed on the **MAGI** of Evangelion. Just as Dr. Naoko Akagi transplanted the three facets of her own personality into three supercomputers, three personas — **the scientist, the mother, the woman** (MELCHIOR / BALTHASAR / CASPER) — score any given prompt independently. They auto-iterate until all three reach 80, then return the version the council has passed. Any genre is fair game — planning, naming, copy, explanation, strategy, analysis — anything worth honing. It runs straight through to a verdict without asking the user questions mid-deliberation.
 
@@ -48,8 +50,8 @@ Scores are honest, not scripted: the council passes only at all-80, and reports 
 Inside Claude Code, run:
 
 ```text
-/plugin marketplace add tmknzz/MAGI
-/plugin install magi@magi
+/plugin marketplace add tmknzz/qwenmagi
+/plugin install qwenmagi@qwenmagi
 ```
 
 This registers the skill automatically.
@@ -59,9 +61,9 @@ This registers the skill automatically.
 Copy the skill folder into Claude Code's skills directory:
 
 ```bash
-git clone https://github.com/tmknzz/MAGI.git
-cd MAGI
-mkdir -p ~/.claude/skills && cp -R skills/magi ~/.claude/skills/magi
+git clone https://github.com/tmknzz/qwenmagi.git
+cd qwenmagi
+mkdir -p ~/.claude/skills && cp -R skills/qwenmagi ~/.claude/skills/qwenmagi
 ```
 
 ### Manual install (Codex)
@@ -69,9 +71,9 @@ mkdir -p ~/.claude/skills && cp -R skills/magi ~/.claude/skills/magi
 Copy the skill folder into Codex's skills directory:
 
 ```bash
-git clone https://github.com/tmknzz/MAGI.git
-cd MAGI
-mkdir -p ~/.agents/skills && cp -R skills/magi ~/.agents/skills/magi
+git clone https://github.com/tmknzz/qwenmagi.git
+cd qwenmagi
+mkdir -p ~/.agents/skills && cp -R skills/qwenmagi ~/.agents/skills/qwenmagi
 ```
 
 Codex reads user-level skills from `~/.agents/skills` (a repo-local `.agents/skills` also works for per-project use).
@@ -79,14 +81,14 @@ Codex reads user-level skills from `~/.agents/skills` (a repo-local `.agents/ski
 ### pi
 
 ```sh
-pi --skill /absolute/path/MAGI/skills/magi/SKILL.md
+pi --skill /absolute/path/qwenmagi/skills/qwenmagi/SKILL.md
 ```
 
-Invoke `/skill:magi` inside pi. Installing to `~/.agents/skills/magi` also works.
+Invoke `/skill:qwenmagi` inside pi. Installing to `~/.agents/skills/qwenmagi` also works.
 
 ## Selecting a Formation
 
-Create `~/.config/magi/formations/local.conf`, then ask MAGI to use the `local` Formation:
+Create `~/.config/qwenmagi/formations/local.conf`, then ask qwenmagi to use the `local` Formation:
 
 ```text
 MAGI-M: pi qwen38-local/Qwen3.8-27B-abliterated-MLX-4bit low
@@ -96,21 +98,21 @@ MAGI-C: codex gpt-6-astra high
 
 Use model IDs and Thinking levels supported by your provider. Omitted seats use the calling AI. Without a selected MAGI Formation, MAGI inherits VDGG's council seats, or uses primary for all seats if none are assigned. Standalone use does not require VDGG.
 
-See the [Formation guide](skills/magi/references/formations.md) for selection precedence, CLI execution, pi configuration, and failure handling. The helper requires Python 3.
+See the [Formation guide](skills/qwenmagi/references/formations.md) for selection precedence, CLI execution, pi configuration, and failure handling. The helper requires Python 3.
 
 ## Usage
 
 Trigger it with any of:
 
-- Type `/magi`
-- Ask for it by name, e.g. "MAGIで練って" / "MAGIで審議して"
-- Name "MAGI" explicitly
+- Type `/qwenmagi`
+- Ask for it by name, e.g. "qwenmagiで練って" / "qwenmagiで審議して"
+- Name "qwenmagi" explicitly
 
 Once it receives a prompt, MAGI **runs autonomously without inserting questions**. It shows the deliberation log (each round's scores and critiques) but never stops to ask "what should I do?" — it runs straight through to a verdict.
 
 ## Working with VDGG
 
-When used alongside [VibesDeGoGo! for Claude Code](https://github.com/tmknzz/VibesDeGoGo-for-Claude-Code) or [VibesDeGoGo! for Codex](https://github.com/tmknzz/VibesDeGoGo-for-Codex), MAGI also takes on two roles:
+When used alongside [VibesDeGoGo! for Claude Code](https://github.com/tmknzz/VibesDeGoGo-for-Claude-Code) or [VibesDeGoGo! for Codex](https://github.com/tmknzz/VibesDeGoGo-for-Codex), explicitly select `qwenmagi` for these two roles. The default MAGI integration continues to use the original `magi`:
 
 - **(a) Step 0 requirements council** — the three personas pressure-test the requirements draft and hand the user the material to decide on.
 - **(b) Review gate for subjective artifacts** — passing or rejecting copy, docs, design, naming, and the like.
